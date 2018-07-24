@@ -51,3 +51,20 @@ if __name__ == "__main__":
     else:
         print 'wrong TASK argument.'
         exit(1)
+
+    ## dev set
+    if _data == 'TACRED':
+        output = outdir +'/prediction_emb_' + _method + '_' + _sim_func + '_dev.txt'
+        ground_truth = load_labels(indir + '/mention_type_dev.txt')
+
+        if _task == 'extract':
+            non_label_index = find_non_index(indir + '/type.txt')
+            predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index) # need modify predict function
+        elif:
+            _task == 'classify':
+            predict(indir, outdir, _method, _sim_func, _threshold, output, None)
+        else:
+            print 'wrong TASK argument!'
+            exit(1)
+
+        # evaluate part omitted.
