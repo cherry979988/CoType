@@ -1,6 +1,7 @@
 __author__ = 'ZeqiuWu'
 import sys
 import os
+import shutil
 import math
 from multiprocessing import Process, Lock
 from nlp_parse import parse
@@ -16,9 +17,15 @@ def get_number(filename):
             count += 1
         return count
 
+def move_dev_files(dir):
+    shutil.move(dir+'/dev/test_x.txt',dir+'/dev_x.txt')
+    shutil.move(dir+'/dev/test_y.txt',dir+'/dev_y.txt')
+    shutil.move(dir+'/dev/type_test.txt',dir+'type_dev.txt')
+    # os.rmdir(dir+'/dev')
+
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print 'Usage:feature_generation.py -DATA -numOfProcesses -emtypeFlag(0 or 1) -negWeight (1.0)'
+    if len(sys.argv) != 6:
+        print 'Usage:feature_generation.py -DATA -numOfProcesses -emtypeFlag(0 or 1) -negWeight (1.0) -nOfNones (1)'
         exit(1)
     indir = 'data/source/%s' % sys.argv[1]
     if int(sys.argv[3]) == 1:
@@ -37,7 +44,26 @@ if __name__ == "__main__":
     train_json = outdir + '/train_new.json'
     test_json = outdir + '/test_new.json'
 
+    if sys.argv[1] == 'TACRED':
+        USE_PROVIDED_DEV = True
+        raw_dev_json = indir + '/dev.json'
+        dev_json = outdir + '/dev_new.json'
+
     ### Generate features using Python wrapper (disabled if using run_nlp.sh)
+    # numOfProcesses = int(sys.argv[2])
+    # numOfNones = int(sys.argv[5])
+    # print 'Start nlp parsing'
+    # multi_process_parse(raw_train_json, train_json, True, numOfNones)
+    # print 'Train set parsing done'
+
+    # multi_process_parse(raw_test_json, test_json, False, 1)
+    # print 'Test set parsing done'
+
+    # if sys.argv[1]=='TACRED':
+    #    raw_dev_json = indir + '/dev.json'
+    #    dev_json = outdir + '/dev_new.json'
+    #    multi_process_parse(raw_dev_json, dev_json, False, 1)
+    #    print 'Dev set parsing done'
     print 'Start nlp parsing'
 
     file = open(raw_train_json, 'r')
@@ -81,12 +107,37 @@ if __name__ == "__main__":
     test_json_file.close()
     print 'Test set parsing done'
 
+    if USE_PROVIDED_DEV:
+        file = open(raw_dev_json, 'r')
+        numOfProcesses = int(sys.argv[2])
+        sentences = file.readlines()
+        sentsPerProc = int(math.floor(len(sentences)*1.0/numOfProcesses))
+        processes = []
+        lock = Lock()
+        dev_json_file = open(dev_json, 'w', 0)
+        for i in range(numOfProcesses):
+            if i == numOfProcesses - 1:
+                p = Process(target=parse, args=(sentences[i*sentsPerProc:], dev_json_file, lock, i, False))
+            else:
+                p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], dev_json_file, lock, i, False))
+            p.start()
+            processes.append(p)
+        for proc in processes:
+            proc.join()
+
+        dev_json_file.close()
+        print 'Dev set parsing done'
+
+
     print 'Start em feature extraction'
     pipeline(train_json, indir + '/brown', outdir_em, requireEmType=requireEmType, isEntityMention=True)
 
     filter(outdir_em+'/feature.map', outdir_em+'/train_x.txt', outdir_em+'/feature.txt', outdir_em+'/train_x_new.txt')
 
     pipeline_test(test_json, indir + '/brown', outdir_em+'/feature.txt',outdir_em+'/type.txt', outdir_em, requireEmType=requireEmType, isEntityMention=True)
+    if USE_PROVIDED_DEV:
+        pipeline_test(dev_json, indir + '/brown', outdir_em+'/feature.txt',outdir_em+'/type.txt',outdir_em+'/dev', requireEmType=requireEmType, isEntityMention=True)
+        move_dev_files(outdir_em)
     supertype(outdir_em)
 
     ### Perform no pruning to generate training data
@@ -101,6 +152,9 @@ if __name__ == "__main__":
 
     pipeline_test(test_json, indir + '/brown', outdir+'/feature.txt',outdir+'/type.txt', outdir, requireEmType=requireEmType, isEntityMention=False)
 
+    if USE_PROVIDED_DEV:
+        pipeline_test(dev_json, indir + '/brown', outdir+'/feature.txt',outdir+'/type.txt',outdir+'/dev', requireEmType=requireEmType, isEntityMention=False)
+        move_dev_files(outdir)
     ### Perform no pruning to generate training data
     print 'Start rm training and test data generation'
     feature_number = get_number(outdir + '/feature.txt')

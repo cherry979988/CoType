@@ -9,7 +9,7 @@ mkdir -pv data/results/$Data/rm
 ### Generate features
 ### $inputDataDir $numOfProcess $ifIncludeEntityType $ratioOfNegSample
 echo 'Generate Features...'
-python code/DataProcessor/feature_generation.py $Data 10 0 1.0
+python code/DataProcessor/feature_generation.py $Data 10 0 1.0 1
 echo ' '
 
 ### Train ReType for Relation Extraction

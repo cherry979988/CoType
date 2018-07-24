@@ -8,7 +8,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 class PruneStrategy:
-    def __init__(self, strategy):
+    def __init__(self, strategy): 
         self._strategy = strategy
         self.pruner = self.no_prune
 
@@ -41,10 +41,25 @@ def prune(indir, outdir, strategy, feature_number, type_number, neg_label_weight
     mention_type_test = os.path.join(outdir+'/mention_type_test.txt')
     mention_feature_test = os.path.join(outdir+ '/mention_feature_test.txt')
     feature_type = os.path.join(outdir+ '/feature_type.txt')
+
+    if 'TACRED' in indir:
+        USE_PROVIDED_DEV = True
+    else:
+        USE_PROVIDED_DEV = False
+
+    if USE_PROVIDED_DEV:
+        dev_x = os.path.join(indir+'/dev_x.txt')
+        dev_y = os.path.join(indir+'/dev_y.txt')
+        mention_type_dev = os.path.join(outdir+'/mention_type_dev.txt')
+        mention_feature_dev = os.path.join(outdir+'/mention_feature_dev.txt')
+
     # generate mention_type, and mention_feature for the training corpus
-    with open(train_x) as fx, open(train_y) as fy, open(test_y) as ft, \
+    with open(train_x) as fx, open(train_y) as fy, open(test_y) as ft, open(dev_y) as fd,\
         open(mention_type,'w') as gt, open(mention_feature,'w') as gf:
         for line in ft:
+            seg = line.strip('\r\n').split('\t')
+            ground_truth.add(seg[0])
+        for line in fd:
             seg = line.strip('\r\n').split('\t')
             ground_truth.add(seg[0])
         # generate mention_type and mention_feature
@@ -100,6 +115,33 @@ def prune(indir, outdir, strategy, feature_number, type_number, neg_label_weight
             for f in features:
                 gf.write(str(mid)+'\t'+f+'\t1\n')
     print count
+
+    if USE_PROVIDED_DEV:
+        print 'start dev'
+        with open(dev_x) as fx, open(dev_y) as fy,\
+            open(mention_type_dev, 'w') as gt, open(mention_feature_dev,'w') as gf:
+            for line in fy:
+                line2 = fx.readline()
+                seg = line.strip('\r\n').split('\t')
+                try:
+                    labels = [int(x) for x in seg[1].split(',')]
+                except:
+                    labels = [] ### if it's negative example (no type label), make it a []
+                seg2 = line2.strip('\r\n').split('\t')
+                features = seg2[1].split(',')
+                if seg[0] in mids:
+                    mid = mids[seg[0]]
+                else:
+                    mid = count
+                   # print line2
+                    mids[seg[0]] = count
+                    count += 1
+                for l in labels:
+                    gt.write(str(mid)+'\t'+str(l)+'\t1\n')
+                for f in features:
+                    gf.write(str(mid)+'\t'+f+'\t1\n')
+            print count
+
     print 'start mention part'
     # generate mention.txt
     with open(mention_file,'w') as m:
