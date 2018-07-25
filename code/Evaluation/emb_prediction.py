@@ -105,18 +105,24 @@ class Predicter_useFeatureEmb:
         return max_index, max_score
 
 
-def predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index):
-
+def predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index, val=False):
+    if val==True:
+        mention_feature_file = indir + '/mention_feature_dev.txt'
+    else:
+        mention_feature_file = indir + '/mention_feature_test.txt'
+        
     predicter = Predicter_useFeatureEmb(\
         embs_feature=os.path.join(outdir + '/emb_' + _method + '_feature.txt'), \
         embs_type=os.path.join(outdir + '/emb_' + _method + '_type.txt'), \
-        network_mention_feature=os.path.join(indir + '/mention_feature_test.txt'), \
+        network_mention_feature=os.path.join(mention_feature_file), \
         typefile=os.path.join(indir + '/type.txt'), \
         sim_func=_sim_func)
 
-    with open(os.path.join(indir + '/mention_feature_test.txt')) as f,\
+
+
+    with open(os.path.join(mention_feature_file)) as f,\
          open(output, 'w') as g:
-        mentions_ids = load_mentionids(os.path.join(indir + '/mention_feature_test.txt'))
+        mentions_ids = load_mentionids(os.path.join(mention_feature_file))
         all_candidates = load_all_candidates(os.path.join(indir + '/type.txt'), mentions_ids)
         cnt = 0
         pos_cnt = 0

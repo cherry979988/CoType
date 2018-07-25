@@ -58,11 +58,10 @@ if __name__ == "__main__":
         ground_truth = load_labels(indir + '/mention_type_dev.txt')
 
         if _task == 'extract':
-            non_label_index = find_non_index(indir + '/type.txt')
-            predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index) # need modify predict function
-        elif:
-            _task == 'classify':
-            predict(indir, outdir, _method, _sim_func, _threshold, output, None)
+            none_label_index = find_none_index(indir + '/type.txt')
+            predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index, val=True) # need modify predict function
+        elif _task == 'classify':
+            predict(indir, outdir, _method, _sim_func, _threshold, output, None, val=True)
         else:
             print 'wrong TASK argument!'
             exit(1)

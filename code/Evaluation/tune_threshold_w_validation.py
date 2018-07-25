@@ -91,6 +91,7 @@ if __name__ == "__main__":
     max_prec = -sys.maxint
     max_recall = -sys.maxint
     max_threshold = -sys.maxint
+    print(threshold_list)
     for _threshold in threshold_list:
         threshold_list_str.append(str(_threshold))
         precision, recall, f1 = result[_threshold]
