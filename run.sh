@@ -16,9 +16,9 @@ mkdir -pv data/results/$Data/rm
 ### - KBP: -negative 3 -iters 400 -lr 0.02 -transWeight 1.0
 ###	- NYT: -negative 5 -iters 700 -lr 0.02 -transWeight 7.0
 ### - BioInfer: -negative 5 -iters 700 -lr 0.02 -transWeight 7.0
-# echo 'Learn CoType embeddings...'
-# code/Model/retype/retype-rm -data $Data -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -iters 800 -lr 0.01 -transWeight 1.0
-# echo ' '
+echo 'Learn CoType embeddings...'
+code/Model/retype/retype-rm -data $Data -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -iters 600 -lr 0.01
+echo ' '
 
 ### (NOTE: you need to remove "none" labels in the train/test JSON files when doing relation classification)
 ### parameters for relation classification:

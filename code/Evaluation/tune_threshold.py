@@ -67,7 +67,8 @@ if __name__ == "__main__":
 	prediction = load_label_score(outdir + '/prediction_' + _mode + '_' + _method + '_' + _sim_func + '.txt')
 	file_name = outdir + '/tune_thresholds_' + _mode + '_' + _method + '_' + _sim_func +'.txt'
 	# print _data, _mode, _method, _sim_func
-
+	print(ground_truth[148568])
+	print(prediction[148568])
 
 	step_size = 1
 	prediction = min_max_nomalization(prediction)
