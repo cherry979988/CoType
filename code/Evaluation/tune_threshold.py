@@ -31,12 +31,14 @@ def evaluate_threshold(_threshold, ground_truth):
 
 def evaluate_threshold_neg(_threshold, ground_truth, none_label_index):
 	# print 'threshold = ', _threshold
+	# if _threshold == 0.48:
+	#	print ground_truth
 	prediction_cutoff = defaultdict(set)
 	for i in prediction:
 		if prediction[i][1] > _threshold:
 			prediction_cutoff[i] = set([prediction[i][0]])
 	result = evaluate_rm_neg(prediction_cutoff, ground_truth, none_label_index)
-	# print result
+	print _threshold, result
 	return result
 
 def tune_threshold(_threshold_list, ground_truth, none_label_index):
@@ -67,11 +69,16 @@ if __name__ == "__main__":
 	prediction = load_label_score(outdir + '/prediction_' + _mode + '_' + _method + '_' + _sim_func + '.txt')
 	file_name = outdir + '/tune_thresholds_' + _mode + '_' + _method + '_' + _sim_func +'.txt'
 	# print _data, _mode, _method, _sim_func
-	print(ground_truth[148568])
-	print(prediction[148568])
+	prediction = min_max_nomalization(prediction)
+	print len(ground_truth)
+	precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, 0)
+	print precision, recall, f1
+	print len(ground_truth)
+	precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, 0)
+	print precision, recall, f1
 
 	step_size = 1
-	prediction = min_max_nomalization(prediction)
+	# prediction = min_max_nomalization(prediction)
 	threshold_list = [float(i)/100.0 for i in range(0, 101, step_size)]
 	# print threshold_list[0], 'to', threshold_list[-1], ', step-size:', step_size / 100.0
 

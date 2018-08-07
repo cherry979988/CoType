@@ -33,14 +33,11 @@ def evaluate_threshold(_threshold, ground_truth):
 
 def evaluate_threshold_neg(_threshold, ground_truth, none_label_index):
     # print 'threshold = ', _threshold
-    print len(prediction)
-    print none_label_index
     prediction_cutoff = defaultdict(set)
     for i in prediction:
         if prediction[i][1] > _threshold:
             prediction_cutoff[i] = set([prediction[i][0]])
     result = evaluate_rm_neg(prediction_cutoff, ground_truth, none_label_index)
-    print len(prediction_cutoff)
     return result
 
 def tune_threshold(_threshold_list, ground_truth, none_label_index):
@@ -72,15 +69,20 @@ if __name__ == "__main__":
     # print ground_truth
     file_name = outdir + '/tune_thresholds_' + _mode + '_' + _method + '_' + _sim_func +'.txt'
     # print _data, _mode, _method, _sim_func
+    prediction = min_max_nomalization(prediction)
+    # print(prediction) 
+    none_label_index = find_none_index(indir + '/type.txt')
+    precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
+    print precision, recall, f1
 
     step_size = 1
-    prediction = min_max_nomalization(prediction)
+    # prediction = min_max_nomalization(prediction)
     threshold_list = [float(i)/100.0 for i in range(0, 101, step_size)]
     # print threshold_list[0], 'to', threshold_list[-1], ', step-size:', step_size / 100.0
 
     # split prediction and ground_truth into dev and test set
     print 'total size: ', len(prediction)
-    valSize = int(np.floor(0.1 * len(prediction)))
+    valSize = int(np.floor(0.9 * len(prediction)))
     print 'val size: ', valSize
     keys = prediction.keys()
     random.shuffle(keys)
@@ -142,3 +144,11 @@ if __name__ == "__main__":
     else:
         precision, recall, f1 = evaluate_threshold(max_threshold, ground_truth, None)
     print 'Test \tPrecision:', precision, '.\tRecall:', recall, '.\tF1:', f1
+
+    ground_truth = eva_ground_truth.copy()
+    ground_truth.update(val_ground_truth)
+    prediction = eva_prediction.copy()
+    prediction.update(val_prediction)
+    # print eva_prediction, val_prediction
+    precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
+    print 'All together, precision:', precision, '.\tRecall:', recall, '.\tF1:', f1

@@ -92,14 +92,14 @@ def evaluate_rm_neg(prediction, ground_truth, none_label_index):
     pos_gt = 0.0
     true_pos = 0.0
     for i in ground_truth:
-        if ground_truth[i] != set([none_label_index]):
+        if ground_truth[i] != set([none_label_index]) and len(ground_truth[i])>0:
             pos_gt += 1.0
 
     for i in prediction:
         if prediction[i] != set([none_label_index]):
             # classified as pos example (Is-A-Relation)
             pos_pred += 1
-            if prediction[i] == ground_truth[i]:
+            if i in ground_truth and prediction[i] == ground_truth[i]:
                 true_pos += 1.0
 
     precision = true_pos / (pos_pred + 1e-8)
