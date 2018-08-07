@@ -4,6 +4,7 @@ import sys, os
 from collections import  defaultdict
 from emb_prediction import *
 from evaluation import *
+import pickle
 
 def min_max_nomalization(prediction):
     min_val = sys.maxint
@@ -48,10 +49,20 @@ def tune_threshold(_threshold_list, ground_truth, none_label_index):
             result[_threshold] = evaluate_threshold_neg(_threshold, ground_truth, none_label_index)
     return result
 
+def save_log(data, lr, iter, precision, recall, f1):
+    if os.path.isfile('tune_log.pkl'):
+        with open('tune_log.pkl', 'rb') as f:
+            d = pickle.load(f)
+    else:
+        d = dict()
+    d[(data, lr, iter)] = (precision, recall, f1)
+    with open('tune_log.pkl', 'wb') as f:
+        pickle.dump(d, f, pickle.HIGHEST_PROTOCOL)    
+
 if __name__ == "__main__":
 
-    if len(sys.argv) != 6:
-        print 'Usage: tune_threshold.py -TASK (classifer/extract) -DATA(KBP/NYT/BioInfer) -MODE (emb) -METHOD(retype) -SIM(cosine/dot)'
+    if len(sys.argv) != 8:
+        print 'Usage: tune_threshold.py -TASK (classifer/extract) -DATA(KBP/NYT/BioInfer) -MODE (emb) -METHOD(retype) -SIM(cosine/dot) -lr -iter'
         exit(-1)
 
     # do prediction here
@@ -60,6 +71,8 @@ if __name__ == "__main__":
     _mode = sys.argv[3]
     _method = sys.argv[4]
     _sim_func = sys.argv[5]
+    _lr = float(sys.argv[6])
+    _iter = float(sys.argv[7])
 
     indir = 'data/intermediate/' + _data + '/rm'
     outdir = 'data/results/' + _data + '/rm'
@@ -123,3 +136,4 @@ if __name__ == "__main__":
         precision, recall, f1 = evaluate_threshold(max_threshold, ground_truth, None)
     print 'Test \tPrecision:', precision, '.\tRecall:', recall, '.\tF1:', f1
     
+    save_log(_data, _lr, _iter, precision, recall, f1)
