@@ -86,6 +86,11 @@ if __name__ == "__main__":
     print 'val size: ', valSize
 
     iterN = 100
+    f1_all = 0
+    precision_all = 0
+    recall_all = 0
+    valF1_all = 0
+
     for i in range(iterN):
         keys = prediction.keys()
         random.shuffle(keys)
