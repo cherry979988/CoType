@@ -144,7 +144,7 @@ def predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_in
         labels = []
         scores = []
         mentions = []
-        entropy = []
+        entropys = []
         for line in f:
             seg = line.strip('\r\n').split('\t')
             mention_id = int(seg[0])
@@ -157,14 +157,14 @@ def predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_in
                 mentions.append(mention_id)
                 labels.append(label)
                 scores.append(score)
-                entropy.append(entropy)
+                entropys.append(entropy)
                 cnt += 1
 
         scores_normalized = min_max_normalization(scores)
         # print scores_normalized
         for i in range(len(mentions)):
             if scores_normalized[i] > _threshold:
-                g.write(str(mentions[i])+'\t'+str(labels[i])+'\t'+str(scores_normalized[i])+'\t'+str(entropy[i])+'\n')
+                g.write(str(mentions[i])+'\t'+str(labels[i])+'\t'+str(scores_normalized[i])+'\t'+str(entropys[i])+'\n')
                 pos_cnt += 1
 
         f.close()
