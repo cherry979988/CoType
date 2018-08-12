@@ -42,10 +42,10 @@ def prune(indir, outdir, strategy, feature_number, type_number, neg_label_weight
     mention_feature_test = os.path.join(outdir+ '/mention_feature_test.txt')
     feature_type = os.path.join(outdir+ '/feature_type.txt')
 
-    if 'TACRED' in indir:
-        USE_PROVIDED_DEV = True
-    else:
-        USE_PROVIDED_DEV = False
+    #if 'TACRED' in indir:
+    USE_PROVIDED_DEV = True
+    #else:
+    #    USE_PROVIDED_DEV = False
 
     if USE_PROVIDED_DEV:
         dev_x = os.path.join(indir+'/dev_x.txt')
