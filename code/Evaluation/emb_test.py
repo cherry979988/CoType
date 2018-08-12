@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     ### Evluate embedding predictions
     predictions = load_labels(output)
-    print 'Evalaution:'
+    print 'Evaluation:'
     if _task == 'extract':
         none_label_index = find_none_index(indir + '/type.txt')
         prec, rec, f1 = evaluate_rm_neg(predictions, ground_truth, none_label_index)

@@ -44,10 +44,10 @@ if __name__ == "__main__":
     train_json = outdir + '/train_new.json'
     test_json = outdir + '/test_new.json'
 
-    if sys.argv[1] == 'TACRED':
-        USE_PROVIDED_DEV = True
-        raw_dev_json = indir + '/dev.json'
-        dev_json = outdir + '/dev_new.json'
+    # if sys.argv[1] == 'TACRED':
+    USE_PROVIDED_DEV = True
+    raw_dev_json = indir + '/dev.json'
+    dev_json = outdir + '/dev_new.json'
 
     ### Generate features using Python wrapper (disabled if using run_nlp.sh)
     # numOfProcesses = int(sys.argv[2])

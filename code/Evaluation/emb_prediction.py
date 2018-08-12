@@ -12,6 +12,8 @@ from math import sqrt
 import operator
 from DataIO import *
 from Classifier import casestudy
+import numpy as np
+import scipy
 
 def sim_func(v1, v2, _MODE):
     val = 0.0
@@ -95,14 +97,25 @@ class Predicter_useFeatureEmb:
         # calculate scores and find maximum score
         max_index = -1
         max_score = -sys.maxint
+        score_list = []
         for i in candidate:
             _emb_type = self._embs_type.get_embedding(i)
             score = sim_func(_emb_mention, _emb_type, self._sim_func)
+            score_list.append(score)
             if  score > max_score:
                     max_index = i
                     max_score = score
 
-        return max_index, max_score
+        entropy = self.calcEntropy(score_list)
+        return max_index, max_score, entropy
+
+    # given scores for each type, calculate entropy (single prediction)
+    def calcEntropy(self, score_list):
+        # first step softmax
+        temp = np.exp(score_list) / np.sum(np.exp(score_list), axis=0)
+        # second step entropy
+        return scipy.stats.entropy(temp)
+
 
 
 def predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index, val=False):
@@ -130,25 +143,27 @@ def predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_in
         labels = []
         scores = []
         mentions = []
+        entropy = []
         for line in f:
             seg = line.strip('\r\n').split('\t')
             mention_id = int(seg[0])
             if mention_id not in mentions_tested:
                 mentions_tested.add(mention_id)
-                label, score = predicter.predict_types_for_rm_maximum(mention_id, all_candidates[mention_id])
+                label, score, entropy = predicter.predict_types_for_rm_maximum(mention_id, all_candidates[mention_id])
                 if none_label_index != None and score == 0.0:
                     label = none_label_index
                     # print 'No Feature!'
                 mentions.append(mention_id)
                 labels.append(label)
                 scores.append(score)
+                entropy.append(entropy)
                 cnt += 1
 
         scores_normalized = min_max_normalization(scores)
         # print scores_normalized
         for i in range(len(mentions)):
             if scores_normalized[i] > _threshold:
-                g.write(str(mentions[i])+'\t'+str(labels[i])+'\t'+ str(scores_normalized[i]) + '\n')
+                g.write(str(mentions[i])+'\t'+str(labels[i])+'\t'+str(scores_normalized[i])+'\t'+str(entropy[i])+'\n')
                 pos_cnt += 1
 
         f.close()
