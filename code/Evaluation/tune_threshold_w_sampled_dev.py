@@ -72,8 +72,8 @@ if __name__ == "__main__":
     prediction = min_max_nomalization(prediction)
     # print(prediction) 
     none_label_index = find_none_index(indir + '/type.txt')
-    precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
-    print precision, recall, f1
+    # precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
+    # print precision, recall, f1
 
     step_size = 1
     # prediction = min_max_nomalization(prediction)
@@ -82,73 +82,85 @@ if __name__ == "__main__":
 
     # split prediction and ground_truth into dev and test set
     print 'total size: ', len(prediction)
-    valSize = int(np.floor(0.9 * len(prediction)))
+    valSize = int(np.floor(0.1 * len(prediction)))
     print 'val size: ', valSize
-    keys = prediction.keys()
-    random.shuffle(keys)
-    keys_val = keys[0:valSize]
-    keys_eva = keys[valSize:]
-    val_prediction = {idx: prediction[idx] for idx in keys_val}
-    val_ground_truth = {idx: ground_truth[idx] for idx in keys_val}
-    eva_prediction = {idx: prediction[idx] for idx in keys_eva}
-    eva_ground_truth = {idx: ground_truth[idx] for idx in keys_eva}
 
-    prediction = val_prediction
-    ground_truth = val_ground_truth
+    iterN = 100
+    for i in range(iterN):
+        keys = prediction.keys()
+        random.shuffle(keys)
+        keys_val = keys[0:valSize]
+        keys_eva = keys[valSize:]
+        val_prediction = {idx: prediction[idx] for idx in keys_val}
+        val_ground_truth = {idx: ground_truth[idx] for idx in keys_val}
+        eva_prediction = {idx: prediction[idx] for idx in keys_eva}
+        eva_ground_truth = {idx: ground_truth[idx] for idx in keys_eva}
 
-    if _task == 'extract':
-        none_label_index = find_none_index(indir + '/type.txt')
-        # print '[None] label index: ', none_label_index
-        result = tune_threshold(threshold_list, ground_truth, none_label_index)
-    else:
-        result = tune_threshold(threshold_list, ground_truth, None)
+        prediction = val_prediction
+        ground_truth = val_ground_truth
+
+        if _task == 'extract':
+            none_label_index = find_none_index(indir + '/type.txt')
+            # print '[None] label index: ', none_label_index
+            result = tune_threshold(threshold_list, ground_truth, none_label_index)
+        else:
+            result = tune_threshold(threshold_list, ground_truth, None)
 
 
-    ### Output
-    prec_list = []
-    recall_list = []
-    f1_list = []
-    threshold_list_str = []
-    max_f1 = -sys.maxint
-    max_prec = -sys.maxint
-    max_recall = -sys.maxint
-    max_threshold = -sys.maxint
-    for _threshold in threshold_list:
-        threshold_list_str.append(str(_threshold))
-        precision, recall, f1 = result[_threshold]
-        prec_list.append(str(precision))
-        recall_list.append(str(recall))
-        f1_list.append(str(f1))
-        if max_f1 < f1:
-            max_f1 = f1
-            max_prec = precision
-            max_recall = recall
-            max_threshold = _threshold
+        ### Output
+        prec_list = []
+        recall_list = []
+        f1_list = []
+        threshold_list_str = []
+        max_f1 = -sys.maxint
+        max_prec = -sys.maxint
+        max_recall = -sys.maxint
+        max_threshold = -sys.maxint
+        for _threshold in threshold_list:
+            threshold_list_str.append(str(_threshold))
+            precision, recall, f1 = result[_threshold]
+            prec_list.append(str(precision))
+            recall_list.append(str(recall))
+            f1_list.append(str(f1))
+            if max_f1 < f1:
+                max_f1 = f1
+                max_prec = precision
+                max_recall = recall
+                max_threshold = _threshold
 
-    with open(file_name, 'w') as f0:
-        for i in range(len(threshold_list_str)):
-            if _method == 'line':
-                f0.write(recall_list[i] + '\t' + str(float(prec_list[i])) + '\n')
-            elif _method == 'retype':
-                f0.write(str(float(recall_list[i])) + '\t' + str(float(prec_list[i])) + '\n')
-            else:
-                f0.write(recall_list[i] + '\t' + prec_list[i] + '\n')
+        with open(file_name, 'w') as f0:
+            for i in range(len(threshold_list_str)):
+                if _method == 'line':
+                    f0.write(recall_list[i] + '\t' + str(float(prec_list[i])) + '\n')
+                elif _method == 'retype':
+                    f0.write(str(float(recall_list[i])) + '\t' + str(float(prec_list[i])) + '\n')
+                else:
+                    f0.write(recall_list[i] + '\t' + prec_list[i] + '\n')
 
-    print 'Best Validation threshold:', max_threshold, '.\tPrecision:', max_prec, '.\tRecall:', max_recall, '.\tF1:', max_f1
+        # print 'Best Validation threshold:', max_threshold, '.\tPrecision:', max_prec, '.\tRecall:', max_recall, '.\tF1:', max_f1
 
-    # evaluate on the test set
-    ground_truth = eva_ground_truth
-    prediction = eva_prediction
-    if _task == 'extract':
-        precision, recall, f1 = evaluate_threshold_neg(max_threshold, ground_truth, none_label_index)
-    else:
-        precision, recall, f1 = evaluate_threshold(max_threshold, ground_truth, None)
-    print 'Test \tPrecision:', precision, '.\tRecall:', recall, '.\tF1:', f1
+        valF1_all += max_f1
 
-    ground_truth = eva_ground_truth.copy()
-    ground_truth.update(val_ground_truth)
-    prediction = eva_prediction.copy()
-    prediction.update(val_prediction)
+        # evaluate on the test set
+        ground_truth = eva_ground_truth
+        prediction = eva_prediction
+        if _task == 'extract':
+            precision, recall, f1 = evaluate_threshold_neg(max_threshold, ground_truth, none_label_index)
+        else:
+            precision, recall, f1 = evaluate_threshold(max_threshold, ground_truth, None)
+        # print 'Test \tPrecision:', precision, '.\tRecall:', recall, '.\tF1:', f1
+
+        precision_all += precision
+        recall_all += recall
+        f1_all += f1
+
+    valF1_all /= iterN
+    precision_all /= iterN
+    recall_all /= iterN
+    f1_all /= iterN
+
+    print 'F1:', f1_all, '.\tprecision:', precision_all, '.\tRecall:', recall_all, '.\tVal_F1:', valF1_all 
+
     # print eva_prediction, val_prediction
-    precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
-    print 'All together, precision:', precision, '.\tRecall:', recall, '.\tF1:', f1
+    # precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
+    # print 'All together, precision:', precision, '.\tRecall:', recall, '.\tF1:', f1
