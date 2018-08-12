@@ -114,7 +114,8 @@ class Predicter_useFeatureEmb:
         # first step softmax
         temp = np.exp(score_list) / np.sum(np.exp(score_list), axis=0)
         # second step entropy
-        return scipy.stats.entropy(temp)
+        entropy = - np.sum(temp * np.log(temp), axis=0)
+        return entropy
 
 
 
