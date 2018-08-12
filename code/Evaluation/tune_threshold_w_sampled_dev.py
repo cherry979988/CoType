@@ -6,6 +6,7 @@ from emb_prediction import *
 from evaluation import *
 import random
 import numpy as np
+import copy
 
 def min_max_nomalization(prediction):
     min_val = sys.maxint
@@ -91,7 +92,10 @@ if __name__ == "__main__":
     recall_all = 0
     valF1_all = 0
 
+    prediction_original = prediction
+
     for i in range(iterN):
+        prediction = copy.deepcopy(prediction_original)
         keys = prediction.keys()
         random.shuffle(keys)
         keys_val = keys[0:valSize]
