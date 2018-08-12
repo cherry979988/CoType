@@ -93,9 +93,11 @@ if __name__ == "__main__":
     valF1_all = 0
 
     prediction_original = prediction
+    ground_truth_original = ground_truth
 
     for i in range(iterN):
         prediction = copy.deepcopy(prediction_original)
+        ground_truth = copy.deepcopy(ground_truth_original)
         keys = prediction.keys()
         random.shuffle(keys)
         keys_val = keys[0:valSize]
