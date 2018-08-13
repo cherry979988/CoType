@@ -63,7 +63,7 @@ if __name__ == "__main__":
         exit(1)
 
     # save dev set result (tuning depend on dev)
-    save_log(_data, _lr, _iter, precision, recall, f1)
+    save_log(_data, _lr, _iter, prec, rec, f1)
 
     # predict test set
     indir = 'data/intermediate/' + _data + '/rm'
