@@ -65,3 +65,18 @@ if __name__ == "__main__":
     else:
         print 'wrong TASK argument!'
         exit(1)
+        
+    predictions = load_labels(output)
+    print 'Evaluation:'
+    if _task == 'extract':
+        none_label_index = find_none_index(indir + '/type.txt')
+        prec, rec, f1 = evaluate_rm_neg(predictions, ground_truth, none_label_index)
+        print 'precision:', prec
+        print 'recall:', rec
+        print 'f1:', f1
+    elif _task == 'classify':
+        prec, rec, f1 = evaluate_rm(predictions, ground_truth)
+        # print 'accuracy:', prec
+    else:
+        print 'wrong TASK argument.'
+        exit(1)

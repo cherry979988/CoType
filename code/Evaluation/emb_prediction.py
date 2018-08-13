@@ -25,6 +25,9 @@ def sim_func(v1, v2, _MODE):
         norm1 = sqrt(sum( [v1[i]*v1[i] for i in range(len(v1))] ))
         norm2 = sqrt(sum( [v2[i]*v2[i] for i in range(len(v1))] ))
         val = sum( [v1[i]*v2[i]/norm1/norm2 for i in range(len(v1))] )
+    elif _MODE == 'project':
+        norm2 = sqrt(sum( [v2[i]*v2[i] for i in range(len(v1))] ))
+        val = sum( [v1[i]*v2[i]/norm2 for i in range(len(v1))] )        
     return val
 
 # Embedding of different nodes
@@ -105,6 +108,13 @@ class Predicter_useFeatureEmb:
             if  score > max_score:
                     max_index = i
                     max_score = score
+            #print(score)
+        #print('\n')
+
+        max_score = np.max(score_list)
+        min_score = np.min(score_list)
+        score_list = (score_list - min_score) / (max_score - min_score)
+        score_list /= np.sum(score_list)
 
         entropy = self.calcEntropy(score_list)
         return max_index, max_score, entropy
