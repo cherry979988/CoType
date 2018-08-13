@@ -40,15 +40,15 @@ def load_label_score(file_name):
         for line in f:
             seg = line.strip('\r\n').split('\t')
             try:
-                if seg[3] == '-Infinity':
+                if seg[2] == '-Infinity':
                     labels[int(seg[0])] = (int(float(seg[1])), 0.0)
                 else:
-                    labels[int(seg[0])] = (int(seg[1]), float(seg[3]))
+                    labels[int(seg[0])] = (int(seg[1]), float(seg[2]))
             except:
-                if seg[3] == '-Infinity':
+                if seg[2] == '-Infinity':
                     labels[int(seg[0])] = (int(float(seg[1])), 0.0)
                 else:
-                    labels[int(seg[0])] = (int(float(seg[1])), float(seg[3]))
+                    labels[int(seg[0])] = (int(float(seg[1])), float(seg[2]))
         f.close()
     return labels
 
