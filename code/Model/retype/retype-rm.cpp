@@ -148,7 +148,8 @@ void TrainModel() {
     gsl_T = gsl_rng_rand48;
     gsl_r = gsl_rng_alloc(gsl_T);
     gsl_rng_set(gsl_r, rand_seed);
-    printf("Using random seed: %d\n", rand_seed)
+    srand(rand_seed);
+    printf("Using random seed: %d\n", rand_seed);
     
     printf("#RM: %d, #RM feature: %d, #RM type: %d\n", node_M.get_num_nodes(), node_F.get_num_nodes(), node_Y.get_num_nodes());
     printf("MF: %d, MY: %d, FY: %d\n", link_MF.get_num_edges(), link_MY.get_num_edges(), link_FY.get_num_edges());

@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -lm -pthread -O2 -march=native -Wall -funroll-loops -Wno-unused-result -lgsl -lm -lgslcblas
-INCLUDES = -I/usr/include -I../eigen-3.2.5
-LIBS = -L/usr/lib/x86_64-linux-gnu
+INCLUDES = -I/usr/include -I../eigen-3.2.5 -I/home/xiang/shihan/Bio-Relation-Extract/gsl-2.4-install/include
+LIBS = -L/usr/lib/x86_64-linux-gnu -L/home/xiang/shihan/Bio-Relation-Extract/gsl-2.4-install/lib
 
 retype retype-rm: ransampl.o hplelib.o retype.o retype-rm.o
 	$(CC) $(CFLAGS) -o retype-rm ransampl.o hplelib.o retype-rm.o $(INCLUDES) $(LIBS) -lgsl -lm -lgslcblas
