@@ -17,9 +17,9 @@ def save_log(data, lr, iter, precision, recall, f1):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 8:
         print 'Usage: emb_test.py -TASK (classify/extract) \
-        -DATA(BioInfer/NYT/Wiki) -METHOD(retype) -SIM(cosine/dot) -THRESHOLD'
+        -DATA(BioInfer/NYT/Wiki) -METHOD(retype) -SIM(cosine/dot) -THRESHOLD -lr -iter'
         exit(-1)
 
     _task = sys.argv[1]
