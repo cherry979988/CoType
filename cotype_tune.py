@@ -31,7 +31,7 @@ for lr in lr_list:
         print(cmd1)
         subprocess.call(cmd1,shell=True)
 
-        cmd2 = 'python2 code/Evaluation/emb_test.py extract %s retypeRm cosine 0.0' % dataset
+        cmd2 = 'python2 code/Evaluation/emb_dev_n_test.py extract %s retypeRm cosine 0.0' % dataset
         print(cmd2)
         subprocess.call(cmd2,shell=True)
 

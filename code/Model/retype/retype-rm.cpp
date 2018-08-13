@@ -10,6 +10,7 @@
 char data[MAX_STRING], task[MAX_STRING];
 char file_path[MAX_STRING], output_path[MAX_STRING], mode = 'm';
 int binary = 0, num_threads = 10, vector_size = 100, negative = 10, iters = 50, iter;
+int rand_seed = 314159265;
 long long total_count = 0, total_count_iter = 0, node_count_actual, samples;
 std::vector<int> mention_set, feature_set;
 real starting_lr = 0.25, alpha = 0.0001;
@@ -146,7 +147,8 @@ void TrainModel() {
     gsl_rng_env_setup();
     gsl_T = gsl_rng_rand48;
     gsl_r = gsl_rng_alloc(gsl_T);
-    gsl_rng_set(gsl_r, 314159265);
+    gsl_rng_set(gsl_r, rand_seed);
+    printf("Using random seed: %d\n", rand_seed)
     
     printf("#RM: %d, #RM feature: %d, #RM type: %d\n", node_M.get_num_nodes(), node_F.get_num_nodes(), node_Y.get_num_nodes());
     printf("MF: %d, MY: %d, FY: %d\n", link_MF.get_num_edges(), link_MY.get_num_edges(), link_FY.get_num_edges());
@@ -247,6 +249,7 @@ int main(int argc, char **argv) {
     if ((i = ArgPos((char *)"-lr", argc, argv)) > 0) starting_lr = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-alpha", argc, argv)) > 0) alpha = atof(argv[i + 1]);
     if ((i = ArgPos((char *)"-threads", argc, argv)) > 0) num_threads = atoi(argv[i + 1]);
+    if ((i = ArgPos((char *)"-rand_seed", argc, argv)) > 0) rand_seed = atoi(argv[i + 1]);
     sprintf(file_path, "data/intermediate/%s/", data);
     sprintf(output_path, "data/results/%s/", data);
     lr = starting_lr;

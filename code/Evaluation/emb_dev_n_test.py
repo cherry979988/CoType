@@ -5,6 +5,16 @@ from collections import  defaultdict
 from evaluation import *
 from emb_prediction import *
 
+def save_log(data, lr, iter, precision, recall, f1):
+    if os.path.isfile('tune_log.pkl'):
+        with open('tune_log.pkl', 'rb') as f:
+            d = pickle.load(f)
+    else:
+        d = dict()
+    d[(data, lr, iter)] = (precision, recall, f1)
+    with open('tune_log.pkl', 'wb') as f:
+        pickle.dump(d, f, pickle.HIGHEST_PROTOCOL)
+
 if __name__ == "__main__":
 
     if len(sys.argv) != 6:
@@ -17,6 +27,8 @@ if __name__ == "__main__":
     _method = sys.argv[3]
     _sim_func = sys.argv[4]
     _threshold = float(sys.argv[5])
+    _lr = float(sys.argv[6])
+    _iter = float(sys.argv[7])
 
     # predict dev set
     indir = 'data/intermediate/' + _data + '/rm'
@@ -49,6 +61,9 @@ if __name__ == "__main__":
     else:
         print 'wrong TASK argument.'
         exit(1)
+
+    # save dev set result (tuning depend on dev)
+    save_log(_data, _lr, _iter, precision, recall, f1)
 
     # predict test set
     indir = 'data/intermediate/' + _data + '/rm'
