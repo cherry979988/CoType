@@ -1,4 +1,4 @@
-Data=TACRED
+Data=KBP
 echo $Data
 
 mkdir -pv data/intermediate/$Data/em/dev
@@ -16,9 +16,9 @@ mkdir -pv data/results/$Data/rm
 ### - KBP: -negative 3 -iters 400 -lr 0.02 -transWeight 1.0
 ###	- NYT: -negative 5 -iters 700 -lr 0.02 -transWeight 7.0
 ### - BioInfer: -negative 5 -iters 700 -lr 0.02 -transWeight 7.0
-echo 'Learn CoType embeddings...'
-code/Model/retype/retype-rm -data $Data -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -iters 600 -lr 0.01
-echo ' '
+#echo 'Learn CoType embeddings...'
+#code/Model/retype/retype-rm -data $Data -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -iters 600 -lr 0.01
+#echo ' '
 
 ### (NOTE: you need to remove "none" labels in the train/test JSON files when doing relation classification)
 ### parameters for relation classification:
@@ -28,6 +28,6 @@ echo ' '
 
 ### Evaluate ReType on Relation Extraction (change the mode to "classify" for relation classification)
 echo 'Evaluate on Relation Extraction...'
-python2 code/Evaluation/emb_test.py extract $Data retypeRm cosine 0.0
+python2 code/Evaluation/emb_dev_n_test.py extract $Data retypeRm cosine 0.0
 # python2 code/Evaluation/convertPredictionToJson.py $Data 0.0
-python2 code/Evaluation/tune_threshold_w_validation.py extract $Data emb retypeRm cosine
+python2 code/Evaluation/tune_threshold_w_sampled_dev.py extract $Data emb retypeRm cosine

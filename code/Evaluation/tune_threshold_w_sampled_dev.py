@@ -17,6 +17,7 @@ def min_max_nomalization(prediction):
             min_val = prediction[i][1]
         if prediction[i][1] > max_val:
             max_val = prediction[i][1]
+    print(min_val, max_val)
     for i in prediction:
         score_normalized = (prediction[i][1] - min_val) / (max_val - min_val + 1e-8)
         prediction_normalized[i] = (prediction[i][0], score_normalized)
@@ -36,7 +37,7 @@ def evaluate_threshold_neg(_threshold, ground_truth, none_label_index):
     # print 'threshold = ', _threshold
     prediction_cutoff = defaultdict(set)
     for i in prediction:
-        if prediction[i][1] > _threshold:
+        if prediction[i][1] < _threshold:
             prediction_cutoff[i] = set([prediction[i][0]])
     result = evaluate_rm_neg(prediction_cutoff, ground_truth, none_label_index)
     return result
@@ -73,8 +74,8 @@ if __name__ == "__main__":
     prediction = min_max_nomalization(prediction)
     # print(prediction) 
     none_label_index = find_none_index(indir + '/type.txt')
-    # precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)
-    # print precision, recall, f1
+    precision, recall, f1 = evaluate_threshold_neg(1.0, ground_truth, none_label_index)
+    print precision, recall, f1
 
     step_size = 1
     # prediction = min_max_nomalization(prediction)

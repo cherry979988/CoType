@@ -59,9 +59,9 @@ if __name__ == "__main__":
 
     if _task == 'extract':
         none_label_index = find_none_index(indir + '/type.txt')
-        predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index, val=True) # need modify predict function
+        predict(indir, outdir, _method, _sim_func, _threshold, output, none_label_index, val=False) # need modify predict function
     elif _task == 'classify':
-        predict(indir, outdir, _method, _sim_func, _threshold, output, None, val=True)
+        predict(indir, outdir, _method, _sim_func, _threshold, output, None, val=False)
     else:
         print 'wrong TASK argument!'
         exit(1)
