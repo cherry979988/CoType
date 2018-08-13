@@ -112,6 +112,7 @@ class Predicter_useFeatureEmb:
     # given scores for each type, calculate entropy (single prediction)
     def calcEntropy(self, score_list):
         # first step softmax
+        print(score_list)
         temp = np.exp(score_list) / np.sum(np.exp(score_list), axis=0)
         # second step entropy
         entropy = - np.sum(temp * np.log(temp), axis=0)
