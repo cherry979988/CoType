@@ -4,6 +4,7 @@ import sys
 from collections import  defaultdict
 from evaluation import *
 from emb_prediction import *
+import pickle
 
 def save_log(data, lr, iter, precision, recall, f1):
     if os.path.isfile('tune_log.pkl'):
