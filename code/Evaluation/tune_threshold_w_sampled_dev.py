@@ -53,8 +53,8 @@ def tune_threshold(_threshold_list, ground_truth, none_label_index):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 6:
-        print 'Usage: tune_threshold.py -TASK (classifer/extract) -DATA(KBP/NYT/BioInfer) -MODE (emb) -METHOD(retype) -SIM(cosine/dot)'
+    if len(sys.argv) != 7:
+        print 'Usage: tune_threshold.py -TASK (classifer/extract) -DATA(KBP/NYT/BioInfer) -MODE(emb) -METHOD(retype) -SIM(cosine/dot) -rand_seed'
         exit(-1)
 
     # do prediction here
@@ -63,6 +63,10 @@ if __name__ == "__main__":
     _mode = sys.argv[3]
     _method = sys.argv[4]
     _sim_func = sys.argv[5]
+    _seed = int(sys.argv[6])
+
+    np.random.seed(_seed)
+    random.seed(_seed)
 
     indir = 'data/intermediate/' + _data + '/rm'
     outdir = 'data/results/' + _data + '/rm'
