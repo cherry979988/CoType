@@ -26,18 +26,18 @@ dataset = sys.argv[1]
 
 for lr in lr_list:
     for iter in iter_list:
-        cmd1 = 'code/Model/retype/retype-rm -data %s -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -iters %s -lr %s'\
+        cmd1 = 'code/Model/retype/retype-rm -data %s -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -lr %s -iters %s -rand_seed 1234'\
             % (dataset, lr, iter)
         print(cmd1)
         subprocess.call(cmd1,shell=True)
 
-        cmd2 = 'python2 code/Evaluation/emb_dev_n_test.py extract %s retypeRm cosine 0.0' % dataset
+        cmd2 = 'python2 code/Evaluation/emb_dev_n_test.py extract %s retypeRm cosine 0.0 %s %s' % (dataset, lr, iter)
         print(cmd2)
         subprocess.call(cmd2,shell=True)
 
-        cmd3 = 'python2 code/Evaluation/tune_threshold_w_validation.py extract %s emb retypeRm cosine' % dataset
-        print(cmd3)
-        subprocess.call(cmd3,shell=True)
+        #cmd3 = 'python2 code/Evaluation/tune_threshold_w_validation.py extract %s emb retypeRm cosine' % dataset
+        #print(cmd3)
+        #subprocess.call(cmd3,shell=True)
 
 
 print('====TUNING COMPLETED!====')
