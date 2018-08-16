@@ -35,9 +35,10 @@ def evaluate_threshold(_threshold, ground_truth):
 
 def evaluate_threshold_neg(_threshold, ground_truth, none_label_index):
     # print 'threshold = ', _threshold
+    # for entropy tuning it should be <, for max tuning it should be >
     prediction_cutoff = defaultdict(set)
     for i in prediction:
-        if prediction[i][1] > _threshold:
+        if prediction[i][1] < _threshold:
             prediction_cutoff[i] = set([prediction[i][0]])
     result = evaluate_rm_neg(prediction_cutoff, ground_truth, none_label_index)
     return result
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     prediction = min_max_nomalization(prediction)
     # print(prediction) 
     none_label_index = find_none_index(indir + '/type.txt')
-    precision, recall, f1 = evaluate_threshold_neg(0, ground_truth, none_label_index)
+    precision, recall, f1 = evaluate_threshold_neg(1, ground_truth, none_label_index)
     print precision, recall, f1
 
     step_size = 1
