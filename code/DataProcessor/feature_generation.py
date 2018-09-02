@@ -64,69 +64,73 @@ if __name__ == "__main__":
     #    dev_json = outdir + '/dev_new.json'
     #    multi_process_parse(raw_dev_json, dev_json, False, 1)
     #    print 'Dev set parsing done'
-    print 'Start nlp parsing'
+    
+    Parse = False # multi-process parse will influence the order of data
 
-    file = open(raw_train_json, 'r')
-    sentences = file.readlines()
-    numOfProcesses = int(sys.argv[2])
-    sentsPerProc = int(math.floor(len(sentences)*1.0/numOfProcesses))
-    lock = Lock()
-    processes = []
-    train_json_file = open(train_json, 'w', 0)
+    if Parse:
+        print 'Start nlp parsing'
 
-    for i in range(numOfProcesses):
-        if i == numOfProcesses - 1:
-            p = Process(target=parse, args=(sentences[i*sentsPerProc:], train_json_file, lock, i, True))
-        else:
-            p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], train_json_file, lock, i, True))
-        p.start()
-        processes.append(p)
-    for proc in processes:
-        proc.join()
-    train_json_file.close()
+        file = open(raw_train_json, 'r')
+        sentences = file.readlines()
+        numOfProcesses = int(sys.argv[2])
+        sentsPerProc = int(math.floor(len(sentences)*1.0/numOfProcesses))
+        lock = Lock()
+        processes = []
+        train_json_file = open(train_json, 'w', 0)
 
-    print 'Train set parsing done'
+        for i in range(numOfProcesses):
+            if i == numOfProcesses - 1:
+                p = Process(target=parse, args=(sentences[i*sentsPerProc:], train_json_file, lock, i, True))
+            else:
+                p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], train_json_file, lock, i, True))
+            p.start()
+            processes.append(p)
+        for proc in processes:
+            proc.join()
+        train_json_file.close()
 
-    file = open(raw_test_json, 'r')
-    numOfProcesses = int(sys.argv[2])
-    sentences = file.readlines()
-    sentsPerProc = int(math.floor(len(sentences)*1.0/numOfProcesses))
-    processes = []
-    lock = Lock()
-    test_json_file = open(test_json, 'w', 0)
-    for i in range(numOfProcesses):
-        if i == numOfProcesses - 1:
-            p = Process(target=parse, args=(sentences[i*sentsPerProc:], test_json_file, lock, i, False))
-        else:
-            p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], test_json_file, lock, i, False))
-        p.start()
-        processes.append(p)
-    for proc in processes:
-        proc.join()
+        print 'Train set parsing done'
 
-    test_json_file.close()
-    print 'Test set parsing done'
-
-    if USE_PROVIDED_DEV:
-        file = open(raw_dev_json, 'r')
+        file = open(raw_test_json, 'r')
         numOfProcesses = int(sys.argv[2])
         sentences = file.readlines()
         sentsPerProc = int(math.floor(len(sentences)*1.0/numOfProcesses))
         processes = []
         lock = Lock()
-        dev_json_file = open(dev_json, 'w', 0)
+        test_json_file = open(test_json, 'w', 0)
         for i in range(numOfProcesses):
             if i == numOfProcesses - 1:
-                p = Process(target=parse, args=(sentences[i*sentsPerProc:], dev_json_file, lock, i, False))
+                p = Process(target=parse, args=(sentences[i*sentsPerProc:], test_json_file, lock, i, False))
             else:
-                p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], dev_json_file, lock, i, False))
+                p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], test_json_file, lock, i, False))
             p.start()
             processes.append(p)
         for proc in processes:
             proc.join()
 
-        dev_json_file.close()
-        print 'Dev set parsing done'
+        test_json_file.close()
+        print 'Test set parsing done'
+
+        if USE_PROVIDED_DEV:
+            file = open(raw_dev_json, 'r')
+            numOfProcesses = int(sys.argv[2])
+            sentences = file.readlines()
+            sentsPerProc = int(math.floor(len(sentences)*1.0/numOfProcesses))
+            processes = []
+            lock = Lock()
+            dev_json_file = open(dev_json, 'w', 0)
+            for i in range(numOfProcesses):
+                if i == numOfProcesses - 1:
+                    p = Process(target=parse, args=(sentences[i*sentsPerProc:], dev_json_file, lock, i, False))
+                else:
+                    p = Process(target=parse, args=(sentences[i*sentsPerProc:(i+1)*sentsPerProc], dev_json_file, lock, i, False))
+                p.start()
+                processes.append(p)
+            for proc in processes:
+                proc.join()
+
+            dev_json_file.close()
+            print 'Dev set parsing done'
 
 
     print 'Start em feature extraction'
