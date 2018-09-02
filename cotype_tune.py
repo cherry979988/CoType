@@ -26,7 +26,7 @@ dataset = sys.argv[1]
 
 for lr in lr_list:
     for iter in iter_list:
-        cmd1 = 'code/Model/retype/retype-rm -data %s -mode m -size 50 -negative 3 -threads 3 -alpha 0.0001 -samples 1 -lr %s -iters %s -rand_seed 1234'\
+        cmd1 = 'code/Model/retype/retype-rm -data %s -mode m -size 50 -negative 3 -threads 5 -alpha 0.0001 -samples 1 -lr %s -iters %s -rand_seed 1234'\
             % (dataset, lr, iter)
         print(cmd1)
         subprocess.call(cmd1,shell=True)
@@ -43,3 +43,17 @@ for lr in lr_list:
 print('====TUNING COMPLETED!====')
 best_lr, best_iter = get_best_params(dataset)
 print('Best Param: Learning Rate = %s, Iteration = %s' % (str(best_lr), str(best_iter)))
+
+for i in [1,2,3,4,5]:
+    cmd1 = 'code/Model/retype/retype-rm -data %s -mode m -size 50 -negative 3 -threads 5 -alpha 0.0001 -samples 1 -lr %s -iters %s -rand_seed %d'\
+        % (dataset, best_lr, best_iter, i)
+    print(cmd1)
+    subprocess.call(cmd1,shell=True)
+
+    cmd2 = 'python2 code/Evaluation/emb_dev_n_test.py extract %s retypeRm cosine 0.0 %s %s' % (dataset, best_lr, best_iter)
+    print(cmd2)
+    subprocess.call(cmd2,shell=True)
+
+    cmd3 = 'python2 code/Evaluation/tune_threshold_w_sampled_dev.py extract %s emb retypeRm cosine %d' % (dataset, i)
+    print(cmd3)
+    subprocess.call(cmd3,shell=True)

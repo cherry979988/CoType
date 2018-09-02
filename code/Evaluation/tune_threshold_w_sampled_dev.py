@@ -11,16 +11,22 @@ import copy
 def min_max_nomalization(prediction):
     min_val = sys.maxint
     max_val = -sys.maxint
+    min_val_2 = sys.maxint
+    max_val_2 = -sys.maxint
     prediction_normalized = defaultdict(tuple)
     for i in prediction:
         if prediction[i][1] < min_val:
             min_val = prediction[i][1]
         if prediction[i][1] > max_val:
             max_val = prediction[i][1]
-    print(min_val, max_val)
+        if prediction[i][2] < min_val_2:
+            min_val_2 = prediction[i][2]
+        if prediction[i][2] > max_val_2:
+            max_val_2 = prediction[i][2]
     for i in prediction:
         score_normalized = (prediction[i][1] - min_val) / (max_val - min_val + 1e-8)
-        prediction_normalized[i] = (prediction[i][0], score_normalized)
+        score_normalized_2 = (prediction[i][2] - min_val_2) / (max_val_2 - min_val_2 + 1e-8)
+        prediction_normalized[i] = (prediction[i][0], score_normalized, score_normalized_2)
     return prediction_normalized
 
 def evaluate_threshold(_threshold, ground_truth):
@@ -33,23 +39,27 @@ def evaluate_threshold(_threshold, ground_truth):
     # print result
     return result
 
-def evaluate_threshold_neg(_threshold, ground_truth, none_label_index):
-    # print 'threshold = ', _threshold
-    # for entropy tuning it should be <, for max tuning it should be >
+def evaluate_threshold_neg(_threshold, ground_truth, none_label_index, thres_type='max'):
     prediction_cutoff = defaultdict(set)
-    for i in prediction:
-        if prediction[i][1] < _threshold:
-            prediction_cutoff[i] = set([prediction[i][0]])
+    if thres_type == 'max':
+        for i in prediction:
+            if prediction[i][1] > _threshold:
+                prediction_cutoff[i] = set([prediction[i][0]])
+    elif thres_type == 'entropy':
+        for i in prediction:
+            if prediction[i][2] < _threshold:
+                prediction_cutoff[i] = set([prediction[i][0]])
     result = evaluate_rm_neg(prediction_cutoff, ground_truth, none_label_index)
+    #print _threshold, result
     return result
 
-def tune_threshold(_threshold_list, ground_truth, none_label_index):
+def tune_threshold(_threshold_list, ground_truth, none_label_index, thres_type='max'):
     result = defaultdict(tuple)
     for _threshold in _threshold_list:
         if none_label_index == None:
             result[_threshold] = evaluate_threshold(_threshold, ground_truth)
         else:
-            result[_threshold] = evaluate_threshold_neg(_threshold, ground_truth, none_label_index)
+            result[_threshold] = evaluate_threshold_neg(_threshold, ground_truth, none_label_index, thres_type)
     return result
 
 if __name__ == "__main__":
@@ -79,7 +89,9 @@ if __name__ == "__main__":
     prediction = min_max_nomalization(prediction)
     # print(prediction) 
     none_label_index = find_none_index(indir + '/type.txt')
-    precision, recall, f1 = evaluate_threshold_neg(1, ground_truth, none_label_index)
+    precision, recall, f1 = evaluate_threshold_neg(-1, ground_truth, none_label_index, 'max')
+    print precision, recall, f1
+    precision, recall, f1 = evaluate_threshold_neg(2, ground_truth, none_label_index, 'entropy')
     print precision, recall, f1
 
     step_size = 1
@@ -97,6 +109,11 @@ if __name__ == "__main__":
     precision_all = 0
     recall_all = 0
     valF1_all = 0
+
+    f1_all_ent = 0
+    precision_all_ent = 0
+    recall_all_ent = 0
+    valF1_all_ent = 0
 
     prediction_original = prediction
     ground_truth_original = ground_truth
@@ -119,50 +136,48 @@ if __name__ == "__main__":
         if _task == 'extract':
             none_label_index = find_none_index(indir + '/type.txt')
             # print '[None] label index: ', none_label_index
-            result = tune_threshold(threshold_list, ground_truth, none_label_index)
+            result = tune_threshold(threshold_list, ground_truth, none_label_index, thres_type='max')
+            result_ent = tune_threshold(threshold_list, ground_truth, none_label_index, thres_type='entropy')
         else:
             result = tune_threshold(threshold_list, ground_truth, None)
 
 
-        ### Output
-        prec_list = []
-        recall_list = []
-        f1_list = []
-        threshold_list_str = []
+        ### max threshold
         max_f1 = -sys.maxint
         max_prec = -sys.maxint
         max_recall = -sys.maxint
         max_threshold = -sys.maxint
         for _threshold in threshold_list:
-            threshold_list_str.append(str(_threshold))
             precision, recall, f1 = result[_threshold]
-            prec_list.append(str(precision))
-            recall_list.append(str(recall))
-            f1_list.append(str(f1))
             if max_f1 < f1:
                 max_f1 = f1
                 max_prec = precision
                 max_recall = recall
                 max_threshold = _threshold
 
-        with open(file_name, 'w') as f0:
-            for i in range(len(threshold_list_str)):
-                if _method == 'line':
-                    f0.write(recall_list[i] + '\t' + str(float(prec_list[i])) + '\n')
-                elif _method == 'retype':
-                    f0.write(str(float(recall_list[i])) + '\t' + str(float(prec_list[i])) + '\n')
-                else:
-                    f0.write(recall_list[i] + '\t' + prec_list[i] + '\n')
+        ### entropy threshold
+        max_ent_f1 = -sys.maxint
+        max_ent_prec = -sys.maxint
+        max_ent_recall = -sys.maxint
+        max_ent_threshold = -sys.maxint
+        for _threshold in threshold_list:
+            precision, recall, f1 = result_ent[_threshold]
+            if max_ent_f1 < f1:
+                max_ent_f1 = f1
+                max_ent_prec = precision
+                max_ent_recall = recall
+                max_ent_threshold = _threshold        
 
         # print 'Best Validation threshold:', max_threshold, '.\tPrecision:', max_prec, '.\tRecall:', max_recall, '.\tF1:', max_f1
 
         valF1_all += max_f1
+        valF1_all_ent += max_ent_f1
 
         # evaluate on the test set
         ground_truth = eva_ground_truth
         prediction = eva_prediction
         if _task == 'extract':
-            precision, recall, f1 = evaluate_threshold_neg(max_threshold, ground_truth, none_label_index)
+            precision, recall, f1 = evaluate_threshold_neg(max_threshold, ground_truth, none_label_index, thres_type='max')
         else:
             precision, recall, f1 = evaluate_threshold(max_threshold, ground_truth, None)
         # print 'Test \tPrecision:', precision, '.\tRecall:', recall, '.\tF1:', f1
@@ -171,12 +186,27 @@ if __name__ == "__main__":
         recall_all += recall
         f1_all += f1
 
+        if _task == 'extract':
+            precision, recall, f1 = evaluate_threshold_neg(max_ent_threshold, ground_truth, none_label_index, thres_type='entropy')
+        else:
+            precision, recall, f1 = evaluate_threshold(max_ent_threshold, ground_truth, None)
+
+        precision_all_ent += precision
+        recall_all_ent += recall
+        f1_all_ent += f1
+
     valF1_all /= iterN
     precision_all /= iterN
     recall_all /= iterN
     f1_all /= iterN
 
-    print 'F1:', f1_all, '.\tprecision:', precision_all, '.\tRecall:', recall_all, '.\tVal_F1:', valF1_all 
+    valF1_all_ent /= iterN
+    precision_all_ent /= iterN
+    recall_all_ent /= iterN
+    f1_all_ent /= iterN
+
+    print 'Max\tF1:', f1_all, '.\tprecision:', precision_all, '.\tRecall:', recall_all, '.\tVal_F1:', valF1_all
+    print 'Entropy\tF1:', f1_all_ent, '.\tprecision:', precision_all_ent, '.\tRecall:', recall_all_ent, '.\tVal_F1:', valF1_all_ent
 
     # print eva_prediction, val_prediction
     # precision, recall, f1 = evaluate_threshold_neg(0.48, ground_truth, none_label_index)

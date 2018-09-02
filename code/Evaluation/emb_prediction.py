@@ -111,10 +111,11 @@ class Predicter_useFeatureEmb:
             #print(score)
         #print('\n')
 
-        max_score = np.max(score_list)
-        min_score = np.min(score_list)
-        score_list = (score_list - min_score) / (max_score - min_score)
-        score_list /= np.sum(score_list)
+        # linear normalization
+        #max_score = np.max(score_list)
+        #min_score = np.min(score_list)
+        #score_list = (score_list - min_score) / (max_score - min_score)
+        #score_list /= np.sum(score_list)
 
         entropy = self.calcEntropy(score_list)
         return max_index, max_score, entropy

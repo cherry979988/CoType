@@ -66,6 +66,8 @@ class MentionReader:
             sentence.add_entityMention(EntityMention(int(em['start']), int(em['end']), em['labels']))
         if 'pos' in decoded:
             sentence.pos = decoded['pos']
+        if 'ner' in decoded:
+            sentence.ner = decoded['ner']
         """
         if 'dep' in decoded:
             for dep in decoded['dep']:
